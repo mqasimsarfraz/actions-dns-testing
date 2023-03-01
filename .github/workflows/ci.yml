@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        domains:
+          - inspektor-gadget.io.
+          - example.com.
+        images:
+          - busybox
+          - tutum/dnsutils
+        servers:
+          - 8.8.4.4
+          - 1.1.1.1
+        id:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+          - 6
+          - 7
+          - 8
+          - 9
+          - 10
+          - 11
+          - 12
+          - 13
+          - 14
+          - 15
+          - 16
+          - 17
+          - 18
+          - 19
+          - 20
+    steps:
+      - name: Check AAAA record for ${{ matrix.domains }} in ${{ matrix.images }} using ${{ matrix.servers }}
+        id: check-aaaa-record
+        run: |
+          docker run --rm ${{ matrix.images }} nslookup -type=aaaa ${{ matrix.domains }} ${{ matrix.servers }}; echo "{exit_code}=$?" >> $GITHUB_OUTPUT
+      - name: Fail if exit_code is not 0
+        if: ${{ steps.check-aaaa-record.outputs.exit_node != 0 }}
+        run: exit 1
